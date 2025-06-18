@@ -4,6 +4,7 @@ import helmet from "helmet";
 import cookieParser from "cookie-parser";
 import AsyncHandler from "../utils/AsyncHandler.js";
 import ApiErrorResponse from "../utils/ApiErrorResponse.js";
+import ApiResponse from "../utils/ApiResponse.js";
 import Logger from "../utils/Logger.js";
 
 let app = express();
@@ -11,8 +12,9 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cors());
 app.use(helmet());
+app.use(cookieParser());
 let port = 3000;
-// app.use(Logger);
+app.use(Logger);
 
 // app.use();
 // app.use();
@@ -22,7 +24,7 @@ let port = 3000;
 app.get(
   "/",
   AsyncHandler((req, res, next) => {
-    next(error);
+    next(a);
   })
 );
 
@@ -39,6 +41,6 @@ app.listen(3000, () => {
 
 app.use((err, req, res, next) => {
   let error = new ApiErrorResponse(err).res();
-  console.log(error);
-  res.json(error);
+  console.log("error");
+  res.json("error");
 });

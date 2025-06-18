@@ -22,12 +22,27 @@ const FacultySchema = new mongoose.Schema(
       trim: true,
       select: false,
     },
+    phone: {
+      type: String,
+      required: [true, RequireField("number")],
+      validate: {
+        validator: function (phone) {
+          return validator.isMobilePhone(phone, "en-IN");
+        },
+        message: "Invalid number format",
+      },
+    },
     email: {
       type: String,
       required: [true, RequireField("email")],
       trim: true,
       unique: true,
-      validate: validator.isEmail,
+      validate: {
+        validator: function (mail) {
+          return validator.isEmail(mail);
+        },
+        message: "Invalid email format",
+      },
     },
     dob: {
       type: String,

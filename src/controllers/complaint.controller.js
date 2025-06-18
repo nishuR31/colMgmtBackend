@@ -1,6 +1,6 @@
-import ApiErrorResponse from "../utils/ApiErrorResponse";
-import ApiResponse from "../utils/ApiResponse";
-import AsyncHandler from "../utils/AsyncHandler";
+import ApiErrorResponse from "../utils/ApiErrorResponse.js";
+import ApiResponse from "../utils/ApiResponse.js";
+import AsyncHandler from "../utils/AsyncHandler.js";
 import Complaint from "../models/complaint.model.js";
 
 export let raiseComplaint = AsyncHandler(async (req, res) => {
@@ -100,6 +100,50 @@ export let replyComplaint = AsyncHandler(async (req, res) => {
         respondedBy: complaint.respondedBy,
         status: complaint.status,
       },
+    }).res()
+  );
+});
+
+export let editComplaint = AsyncHandler(async (req, res) => {
+  let edit = req.query.edit;
+  let id = req.params.id;
+  let data = req.body;
+  let { response, status, respondedBy, message, by } = data;
+  if (
+    [edit, respondedBy, response, message, status, by, id].some(
+      (field) => !field?.trim()
+    )
+  ) {
+    return res
+      .status(400)
+      .json(ApiErrorResponse({ message: "fields were missing" }).res());
+  }
+  if (edit.toLowerCase() !== "edit") {
+    return res.status(400).json(
+      ApiErrorResponse({
+        message: "Invalid edit query",
+        edit: edit,
+      }).res()
+    );
+  }
+  let updatedComplaint = await Complaint.findByIdAndUpdate(
+    { _id: id },
+    { ...data },
+    { new: true, validatebeforeSave: false }
+  );
+  if (!updatedComplaint) {
+    return res
+      .status(403)
+      .json(
+        ApiErrorResponse(
+          { message: "Something wrong with replying to the complaint" },
+          403
+        ).res()
+      );
+  }
+  return res.status(202).json(
+    ApiResponse({
+      message: "Complaint updated successfully",
     }).res()
   );
 });

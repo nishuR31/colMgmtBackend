@@ -2,6 +2,7 @@ import mongoose from "mongoose";
 import RequireField from "../utils/RequireField.js";
 import { admin, password, salt } from "../Constants.js";
 import bcryptjs from "bcryptjs";
+import validator from "validator";
 
 const AdminSchema = new mongoose.Schema(
   {
@@ -9,9 +10,31 @@ const AdminSchema = new mongoose.Schema(
       type: String,
       trim: true,
     },
+    phone: {
+      type: String,
+      required: [true, RequireField("number")],
+      validate: {
+        validator: function (phone) {
+          return validator.isMobilePhone(phone, "en-IN");
+        },
+        message: "Invalid number format",
+      },
+    },
+    email: {
+      type: String,
+      required: [true, RequireField("email")],
+      trim: true,
+      unique: true,
+      validate: {
+        validator: function (mail) {
+          return validator.isEmail(mail);
+        },
+        message: "Invalid email format",
+      },
+    },
     username: {
       type: String,
-      required: [true, RequireField("uid")],
+      required: [true, RequireField("username")],
       unique: true,
       default: admin,
       trim: true,

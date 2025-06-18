@@ -10,7 +10,7 @@ export default class ApiResponse {
       data: this.data,
       statusCode: this.statusCode,
       success: this.success,
-      time: new Date().toLocaleString(),
+      time: new Date().toString(),
     });
   }
 }

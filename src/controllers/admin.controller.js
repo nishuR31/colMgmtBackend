@@ -3,17 +3,16 @@ import { generateTokenOptions, tokenSecret } from "../Constants";
 import AsyncHandler from "../utils/AsyncHandler";
 import { tokenGen, verify } from "../utils/jwtTokens";
 import ApiResponse from "../utils/ApiResponse";
-import { use } from "react";
 
 export let adminSignup = AsyncHandler(async (req, res) => {
   const data = req.body;
-  let { username } = data;
-  if ([username].some((field) => field.length === 0)) {
+  let { username, password, phone, email } = data;
+  if ([username, password, phone, email].some((field) => !field?.trim())) {
     return res
       .status(400)
       .json(ApiErrorResponse({ message: "fields were missing" }).res());
   }
-  let admin = await Admin.findOne(username);
+  let admin = await Admin.findOne({ username, $or: [{ email }, { phone }] });
   if (admin) {
     return res
       .status(200)
@@ -29,9 +28,46 @@ export let adminSignup = AsyncHandler(async (req, res) => {
   );
 });
 
+export let adminEdit = AsyncHandler(async (req, res) => {
+  const data = req.body;
+  let edit = req.query.edit;
+  let { username, password, phone, email } = data;
+  if (
+    [username, password, phone, edit, email].some((field) => !field?.trim())
+  ) {
+    return res
+      .status(400)
+      .json(ApiErrorResponse({ message: "fields were missing" }).res());
+  }
+  if (edit.toLowerCase() !== "edit") {
+    return res
+      .status(400)
+      .json(ApiErrorResponse({ message: "Invalid edit query" }).res());
+  }
+  let admin = await Admin.findOneAndUpdate(
+    { username, $or: [{ email }, { phone }] },
+    { ...data },
+    { new: true, validateBeforeSave: false }
+  );
+  if (!admin) {
+    return res
+      .status(400)
+      .json(
+        ApiErrorResponse({ message: "Admin updatation failed" }, 400).res()
+      );
+  }
+  return res.status(201).json(
+    ApiResponse({
+      success: true,
+      message: "Admin created successfully",
+      admin: newAdmin.username,
+    }).res()
+  );
+});
+
 export let adminDel = AsyncHandler(async (req, res) => {
   let id = req.params.id;
-  if ([id].some((field) => field.length === 0)) {
+  if ([id].some((field) => !field?.trim())) {
     return res
       .status(400)
       .json(ApiErrorResponse({ message: "fields were missing" }).res());
@@ -62,13 +98,15 @@ export let adminDel = AsyncHandler(async (req, res) => {
 });
 
 export let adminSignin = AsyncHandler(async (req, res) => {
-  const { username, password, role } = req.body;
-  if ([username, password, role].some((field) => field.length === 0)) {
+  const { username, password, phone, email, role } = req.body;
+  if (
+    [username, password, phone, email, role].some((field) => field.length === 0)
+  ) {
     return res
       .status(400)
       .json(ApiErrorResponse({ message: "fields were missing" }).res());
   }
-  const admin = await Admin.findOne({ username });
+  const admin = await Admin.findOne({ username, $or: [{ phone }, { email }] });
   if (!admin) {
     return res
       .status(404)
@@ -113,7 +151,7 @@ export let adminSignin = AsyncHandler(async (req, res) => {
 
 export let adminUser = AsyncHandler(async (req, res) => {
   const username = req.params.username.toLowerCase().trim();
-  if ([username].some((field) => field.length === 0)) {
+  if ([username].some((field) => !field?.trim())) {
     return res
       .status(400)
       .json(ApiErrorResponse({ message: "fields were missing" }).res());

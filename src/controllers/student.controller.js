@@ -1,7 +1,7 @@
 import Student from "../models/student.model.js";
 import ApiErrorResponse from "../utils/ApiErrorResponse.js";
 import { verify, tokenGen } from "../utils/jwtTokens.js";
-import { tokenSecret, generateTokenOptions, password } from "../Constants.js";
+import { tokenSecret, generateTokenOptions } from "../Constants.js";
 import ApiResponse from "../utils/ApiResponse.js";
 import AsyncHandler from "../utils/AsyncHandler.js";
 
@@ -13,6 +13,7 @@ export let stuSignup = AsyncHandler(async (req, res) => {
     password,
     email,
     dob,
+    phone,
     branch,
     role,
     program,
@@ -28,14 +29,14 @@ export let stuSignup = AsyncHandler(async (req, res) => {
       password,
       email,
       dob,
+      phone,
       branch,
       role,
       program,
       bloodGroup,
       course,
-      marks,
       gaurdianContactInfo,
-    ].some((field) => field.length === 0)
+    ].some((field) => !field?.trim() || !marks)
   ) {
     return res
       .status(400)
@@ -43,12 +44,13 @@ export let stuSignup = AsyncHandler(async (req, res) => {
   }
 
   let student = await Student.findOne({
-    $or: [{ username }, { fullName }, { email }],
+    username,
+    $or: [{ fullName }, { phone }, { email }],
   });
   if (student) {
     return res
-      .status(204)
-      .json(ApiErrorResponse({ message: "Student already exists" }).res());
+      .status(409)
+      .json(ApiErrorResponse({ message: "Student already exists" }, 409).res());
   }
   const newStudent = await Student.create(data);
   if (!newStudent) {
@@ -65,16 +67,87 @@ export let stuSignup = AsyncHandler(async (req, res) => {
   );
 });
 
-export let stuUser = AsyncHandler(async (req, res) => {
-  const username = req.params.username.toLowerCase().trim();
-  if ([username].some((field) => field.length === 0)) {
+export let stuEdit = AsyncHandler(async (req, res) => {
+  let edit = req.query.edit;
+  const data = req.body;
+  let {
+    username,
+    fullName,
+    password,
+    email,
+    dob,
+    phone,
+    branch,
+    role,
+    program,
+    bloodGroup,
+    course,
+    marks,
+    gaurdianContactInfo,
+  } = data;
+  if (
+    [
+      username,
+      fullName,
+      password,
+      edit,
+      email,
+      dob,
+      phone,
+      branch,
+      role,
+      program,
+      bloodGroup,
+      course,
+      gaurdianContactInfo,
+    ].some((field) => !field?.trim() || !marks)
+  ) {
     return res
       .status(400)
-      .json(ApiErrorResponse({ message: "fields were missing" }).res());
+      .json(ApiErrorResponse({ message: "Missing fields" }).res());
   }
-  const student = await Student.findOne({ username }).select(
-    "-password -refreshToken -role -"
+  if (edit.toLowerCase() !== "edit") {
+    return res
+      .status(400)
+      .json(ApiErrorResponse({ message: "invalid Edit query" }, 400).res());
+  }
+  let student = await Student.findOne({
+    username,
+    $or: [{ fullName }, { phone }, { email }],
+  });
+  if (!student) {
+    return res
+      .status(404)
+      .json(ApiErrorResponse({ message: "Student dont exist" }, 404).res());
+  }
+  const newStudent = await Student.findOneAndUpdate(
+    { username, $or: [{ email }, { phone }] },
+    { ...data },
+    { new: true, validateBeforeSave: false }
   );
+  if (!newStudent) {
+    return res
+      .status(500)
+      .json(ApiResponse({ message: "Student updatation failed" }, 500).res());
+  }
+  return res.status(201).json(
+    ApiResponse({
+      success: true,
+      message: "Student updated successfully",
+      Student: { username: username, name: fullName },
+    }).res()
+  );
+});
+
+export let stuUser = AsyncHandler(async (req, res) => {
+  const username = req.params.username.toLowerCase().trim();
+  if ([username].some((field) => !field?.trim())) {
+    return res
+      .status(404)
+      .json(ApiErrorResponse({ message: "fields were missing" }, 404).res());
+  }
+  const student = await Student.findOne({ username });
+
   if (!student) {
     return res
       .status(404)
@@ -93,14 +166,19 @@ export let stuUser = AsyncHandler(async (req, res) => {
 });
 
 export let stuSignin = AsyncHandler(async (req, res) => {
-  const { username, password, email, role } = req.body;
-  if ([username, password, email, role].some((field) => field.length === 0)) {
+  const { username, password, phone, email, role } = req.body;
+  if (
+    [username, password, email, phone, role].some((field) => !field?.trim())
+  ) {
     return res
       .status(400)
       .json(ApiErrorResponse({ message: "Missing fields" }).res());
   }
 
-  const student = await Student.findOne({ $or: [{ username }, { email }] });
+  const student = await Student.findOne({
+    username,
+    $or: [{ phone }, { email }],
+  });
   if (!student) {
     return res
       .status(404)
@@ -110,11 +188,11 @@ export let stuSignin = AsyncHandler(async (req, res) => {
   }
   if (role !== "student") {
     return res
-      .status(404)
+      .status(406)
       .json(
         ApiErrorResponse(
           { message: "Access denied: Not Student" },
-          404,
+          406,
           false
         ).res()
       );
@@ -150,7 +228,7 @@ export let stuSignin = AsyncHandler(async (req, res) => {
 
 export let stuDel = AsyncHandler(async (req, res) => {
   let id = req.params?.id;
-  if ([id].some((field) => field.length === 0)) {
+  if ([id].some((field) => !field?.trim() || !id)) {
     return res
       .status(400)
       .json(ApiErrorResponse({ message: "fields were missing" }).res());

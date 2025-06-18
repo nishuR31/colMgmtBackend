@@ -22,12 +22,27 @@ const StudentSchema = new mongoose.Schema(
       trim: true,
       select: false,
     },
+    phone: {
+      type: String,
+      required: [true, RequireField("number")],
+      validate: {
+        validator: function (phone) {
+          return validator.isMobilePhone(phone, "en-IN");
+        },
+        message: "Invalid number format",
+      },
+    },
     email: {
       type: String,
       required: [true, RequireField("email")],
       trim: true,
       unique: true,
-      validate: validator.isEmail,
+      validate: {
+        validator: function (mail) {
+          return validator.isEmail(mail);
+        },
+        message: "Invalid email format",
+      },
     },
     fullName: {
       type: String,
@@ -62,12 +77,18 @@ const StudentSchema = new mongoose.Schema(
       required: [true, RequireField("role")],
       enum: { values: ["student"], message: "Invalid role" },
     },
-    marks: { type: mongoose.Schema.Types.ObjectId, ref: "Marks" },
+    course: {
+      type: String,
+      required: [true, RequireField("Course")],
+      trim: true,
+    },
+
+    marks: [{ type: mongoose.Schema.Types.ObjectId, ref: "Marks" }],
     program: {
       type: String,
       required: [true, RequireField("Program")],
     },
-    course: { type: mongoose.Schema.Types.ObjectId, ref: "Course" },
+    subjects: [{ type: mongoose.Schema.Types.ObjectId, ref: "Subject" }],
     guardianContactInfo: {
       type: String,
       required: [true, RequireField("Contact number of guardian")],

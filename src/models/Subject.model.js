@@ -4,15 +4,21 @@ import RequireField from "../utils/RequireField.js";
 
 let SubjectSchema = new mongoose.Schema(
   {
+    username: {
+      type: String,
+      required: [true, RequireField("Username of student")],
+      unique: false,
+      trim: true,
+    },
     code: {
       type: String,
-      required: true,
+      required: [true, RequireField("Code of subject")],
       unique: true,
       trim: true,
     },
     name: {
       type: String,
-      required: true,
+      required: [true, RequireField("Name of subject")],
       trim: true,
     },
     department: {
@@ -30,6 +36,7 @@ let SubjectSchema = new mongoose.Schema(
       type: Number,
       min: 1,
       max: 8,
+      required: [true, RequireField("semester")],
     },
   },
   { timestamps: true }

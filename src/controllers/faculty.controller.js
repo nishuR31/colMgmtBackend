@@ -3,7 +3,7 @@ import Faculty from "../models/falculty.model.js";
 import ApiErrorResponse from "../utils/ApiErrorResponse.js";
 import ApiResponse from "../utils/ApiResponse.js";
 import AsyncHandler from "../utils/AsyncHandler.js";
-import { verify } from "../utils/jwtTokens.js";
+import { verify, tokenGen } from "../utils/jwtTokens.js";
 
 export let facSignup = AsyncHandler(async (req, res) => {
   const data = req?.body;
@@ -13,6 +13,7 @@ export let facSignup = AsyncHandler(async (req, res) => {
     email,
     password,
     dob,
+    phone,
     role,
     bloodGroup,
     designation,
@@ -25,6 +26,7 @@ export let facSignup = AsyncHandler(async (req, res) => {
       email,
       password,
       dob,
+      phone,
       role,
       bloodGroup,
       designation,
@@ -36,7 +38,8 @@ export let facSignup = AsyncHandler(async (req, res) => {
       .json(ApiErrorResponse({ message: "fields were missing" }).res());
   }
   let faculty = await Faculty.findOne({
-    $or: [{ username }, { fullName }, { email }],
+    username,
+    $or: [{ fullName }, { phone }, { email }],
   });
   if (faculty) {
     return res
@@ -59,9 +62,77 @@ export let facSignup = AsyncHandler(async (req, res) => {
   );
 });
 
+export let facEdit = AsyncHandler(async (req, res) => {
+  const data = req?.body;
+  let edot = req.query.edit;
+  let {
+    username,
+    fullName,
+    email,
+    password,
+    dob,
+    phone,
+    role,
+    bloodGroup,
+    designation,
+    department,
+  } = data;
+  if (
+    [
+      username,
+      fullName,
+      email,
+      password,
+      dob,
+      edit,
+      phone,
+      role,
+      bloodGroup,
+      designation,
+      department,
+    ].some((field) => field.length === 0)
+  ) {
+    return res
+      .status(400)
+      .json(ApiErrorResponse({ message: "fields were missing" }).res());
+  }
+  if (edit.toLowerCase() !== "edit") {
+    return res
+      .status(400)
+      .json(ApiErrorResponse({ message: "Invalid edit query" }).res());
+  }
+  let faculty = await Faculty.findOne({
+    username,
+    $or: [{ fullName }, { phone }, { email }],
+  });
+  if (!faculty) {
+    return res
+      .status(404)
+      .json(ApiErrorResponse({ message: "faculty dont exist" }, 404).res());
+  }
+
+  const newFaculty = await Faculty.findOneAndUpdate(
+    { username, $or: [{ phone }, { email }] },
+    { ...date },
+    { new: true, validateBeforeSave: false }
+  );
+  if (!newFaculty) {
+    return res
+      .status(500)
+      .json(ApiResponse({ message: "faculty creation failed" }, 500).res());
+  }
+  return res.status(201).json(
+    ApiResponse({
+      success: true,
+      message: "Faculty created successfully",
+      Faculty: { username: newFaculty.username, fullName: newFaculty.fullName },
+    }).res()
+  );
+});
+
 export let facDel = AsyncHandler(async (req, res) => {
   let id = req?.params.id;
-  if ([id].some((field) => field.length === 0)) {
+  if ([id].some((field) => !field?.trim() || !id)) {
     return res
       .status(400)
       .json(ApiErrorResponse({ message: "fields were missing" }).res());
@@ -89,13 +160,16 @@ export let facDel = AsyncHandler(async (req, res) => {
 });
 
 export let facSignin = AsyncHandler(async (req, res) => {
-  const { username, password, email } = req?.body;
-  if ([password, email, username].some((field) => field.length === 0)) {
+  const { username, password, phone, email } = req?.body;
+  if ([password, email, phone, username].some((field) => !field?.trim())) {
     return res
       .status(400)
       .json(ApiErrorResponse({ message: "fields were missing" }).res());
   }
-  const faculty = await Faculty.findOne({ $or: [{ username }, { email }] });
+  const faculty = await Faculty.findOne({
+    username,
+    $or: [{ phone }, { email }],
+  });
   if (!faculty) {
     return res
       .status(404)
@@ -148,7 +222,7 @@ export let facSignin = AsyncHandler(async (req, res) => {
 
 export let facUser = AsyncHandler(async (req, res) => {
   const username = req?.params.username.toLowerCase().trim();
-  if ([username].some((field) => field.length === 0)) {
+  if ([username].some((field) => !field?.trim())) {
     return res
       .status(400)
       .json(ApiErrorResponse({ message: "fields were missing" }).res());
