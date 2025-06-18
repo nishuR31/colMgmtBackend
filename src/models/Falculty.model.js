@@ -43,9 +43,9 @@ const FacultySchema = new mongoose.Schema(
     ddmmyyyy`,
       ],
     },
-    name: {
+    fullName: {
       type: String,
-      required: [true, RequireField("Name")],
+      required: [true, RequireField("full Name")],
       trim: true,
     },
     bloodGroup: {

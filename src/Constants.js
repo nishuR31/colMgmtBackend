@@ -27,9 +27,9 @@ export const status = ["active", "rejected", "closed"];
 export const admin = "admin";
 export const password = "password";
 export const salt = "$2b$10$OO3RmCCcQHYcAoqtvuBXje";
-export function generateTokenOptions(type = "refresh") {
+export function generateTokenOptions(type = "access") {
   return {
-    expiresIn: type.toLowerCase() === "refresh" ? "1d" : "15d",
+    expiresIn: type.toLowerCase() === "access" ? "1d" : "15d",
     issuer: "Nishan and Nishant",
     audience: "college-portal",
     subject: "token options",
@@ -42,3 +42,5 @@ export const tokenSecret = {
   refresh:
     "lPb5Yt=Av7LnWoK$zXgMr#aH%29426dcbCdFs9ec56d52+4QjIu8Yw*E65d78606ac03m8258b0Lx3^ZqV$1Tb0fe11543eaN@6421cfkRcdc674d#e9!Gp628",
 };
+
+export default "Constants";

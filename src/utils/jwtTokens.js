@@ -20,3 +20,5 @@ export function verify(token, secret, options, type) {
   let decoded = jwt.verify(token, secret[type], options(type));
   return decoded;
 }
+
+export default "jwt";

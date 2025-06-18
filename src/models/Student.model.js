@@ -29,9 +29,9 @@ const StudentSchema = new mongoose.Schema(
       unique: true,
       validate: validator.isEmail,
     },
-    name: {
+    fullName: {
       type: String,
-      required: [true, RequireField("Name")],
+      required: [true, RequireField("full Name")],
       trim: true,
     },
     branch: {
