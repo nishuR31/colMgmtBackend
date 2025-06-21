@@ -1,9 +1,9 @@
-import ApiErrorResponse from "../utils/ApiErrorResponse";
-import { generateTokenOptions, tokenSecret } from "../Constants.js";
-import AsyncHandler from "../utils/AsyncHandler.js";
+import ApiErrorResponse from "../utils/apiErrorResponse.js";
+import { generateTokenOptions, tokenSecret } from "../constants.js";
+import AsyncHandler from "../utils/asyncHandler.js";
 import { tokenGen, verify } from "../utils/jwtTokens.js";
-import ApiResponse from "../utils/ApiResponse.js";
-import Admin from "../models/Admin.model.js";
+import ApiResponse from "../utils/apiResponse.js";
+import Admin from "../models/admin.model.js";
 
 export let adminSignup = AsyncHandler(async (req, res) => {
   const data = req.body;
@@ -11,17 +11,19 @@ export let adminSignup = AsyncHandler(async (req, res) => {
   if ([username, password, phone, email].some((field) => !field?.trim())) {
     return res
       .status(400)
-      .json(ApiErrorResponse({ message: "fields were missing" }).res());
+      .json(new ApiErrorResponse({ message: "fields were missing" }).res());
   }
   let admin = await Admin.findOne({ username, $or: [{ email }] });
   if (admin) {
     return res
       .status(200)
-      .json(ApiErrorResponse({ message: "Admin already exists" }, 200).res());
+      .json(
+        new ApiErrorResponse({ message: "Admin already exists" }, 200).res()
+      );
   }
   const newAdmin = await Admin.create({ ...data });
   return res.status(201).json(
-    ApiResponse({
+    new ApiResponse({
       success: true,
       message: "Admin created successfully",
       admin: newAdmin.username,
@@ -31,20 +33,13 @@ export let adminSignup = AsyncHandler(async (req, res) => {
 
 export let adminEdit = AsyncHandler(async (req, res) => {
   const data = req.body;
-  let edit = req.query.edit;
   let { username, password, phone, email } = data;
-  if (
-    [username, password, phone, edit, email].some((field) => !field?.trim())
-  ) {
+  if ([username, password, phone, email].some((field) => !field?.trim())) {
     return res
       .status(400)
-      .json(ApiErrorResponse({ message: "fields were missing" }).res());
+      .json(new ApiErrorResponse({ message: "fields were missing" }).res());
   }
-  if (edit.toLowerCase() !== "edit") {
-    return res
-      .status(400)
-      .json(ApiErrorResponse({ message: "Invalid edit query" }).res());
-  }
+
   let admin = await Admin.findOneAndUpdate(
     { username, $or: [{ email }, { phone }] },
     { ...data },
@@ -54,11 +49,11 @@ export let adminEdit = AsyncHandler(async (req, res) => {
     return res
       .status(400)
       .json(
-        ApiErrorResponse({ message: "Admin updatation failed" }, 400).res()
+        new ApiErrorResponse({ message: "Admin updatation failed" }, 400).res()
       );
   }
   return res.status(201).json(
-    ApiResponse({
+    new ApiResponse({
       success: true,
       message: "Admin created successfully",
       admin: newAdmin.username,
@@ -71,11 +66,11 @@ export let adminDel = AsyncHandler(async (req, res) => {
   if ([id].some((field) => !field?.trim())) {
     return res
       .status(400)
-      .json(ApiErrorResponse({ message: "field is missing" }).res());
+      .json(new ApiErrorResponse({ message: "field is missing" }).res());
   }
   if (req.admin && req.admin._id.toString() === id) {
     return res.status(403).json(
-      ApiErrorResponse({
+      new ApiErrorResponse({
         message: "You cannot delete your own admin account",
       }).res()
     );
@@ -85,7 +80,7 @@ export let adminDel = AsyncHandler(async (req, res) => {
     return res
       .status(404)
       .json(
-        ApiErrorResponse(
+        new ApiErrorResponse(
           { message: "Cant delete because Admin dont exist" },
           404
         ).res()
@@ -94,7 +89,7 @@ export let adminDel = AsyncHandler(async (req, res) => {
   return res
     .status(200)
     .json(
-      ApiResponse({ message: "Admin deleted", admin: admin.username }).res()
+      new ApiResponse({ message: "Admin deleted", admin: admin.username }).res()
     );
 });
 
@@ -106,21 +101,25 @@ export let adminSignin = AsyncHandler(async (req, res) => {
   ) {
     return res
       .status(400)
-      .json(ApiErrorResponse({ message: "fields were missing" }).res());
+      .json(new ApiErrorResponse({ message: "fields were missing" }).res());
   }
   const admin = await Admin.findOne({ username, $or: [, { email }] });
   if (!admin) {
     return res
       .status(404)
       .json(
-        ApiErrorResponse({ message: "invalid credentials" }, 404, false).res()
+        new ApiErrorResponse(
+          { message: "invalid credentials" },
+          404,
+          false
+        ).res()
       );
   }
   if (role.toLowerCase().trim() !== "admin") {
     return res
       .status(408)
       .json(
-        ApiErrorResponse(
+        new ApiErrorResponse(
           { message: "Access denied: Not admin" },
           408,
           false
@@ -132,13 +131,14 @@ export let adminSignin = AsyncHandler(async (req, res) => {
     return res
       .status(400)
       .json(
-        ApiErrorResponse({ message: "invalid password" }, 400, false).res()
+        new ApiErrorResponse({ message: "invalid password" }, 400, false).res()
       );
   }
   let payload = {
     _id: admin._id,
     username: admin.username,
     email: admin.email,
+    role: admin.role || "admin",
   };
   req.admin = payload;
   let { accessToken, refreshToken } = tokenGen(
@@ -158,7 +158,7 @@ export let adminSignin = AsyncHandler(async (req, res) => {
     sameSite: "Strict",
     maxAge: 1 * 7 * 24 * 60 * 60 * 1000, // 1 days
   });
-  res.status(200).json(ApiResponse({ accessToken: accessToken }).res());
+  res.status(200).json(new ApiResponse({ accessToken: accessToken }).res());
 });
 
 export let adminUser = AsyncHandler(async (req, res) => {
@@ -166,17 +166,19 @@ export let adminUser = AsyncHandler(async (req, res) => {
   if ([username].some((field) => !field?.trim())) {
     return res
       .status(400)
-      .json(ApiErrorResponse({ message: "fields were missing" }).res());
+      .json(new ApiErrorResponse({ message: "fields were missing" }).res());
   }
   const admin = await Admin.findOne({ username });
   if (!admin) {
     return res
       .status(404)
-      .json(ApiErrorResponse({ message: "Admin not found" }, 404, false).res());
+      .json(
+        new ApiErrorResponse({ message: "Admin not found" }, 404, false).res()
+      );
     //   res.redirect("/admin/signup");
   }
   return res.status(200).json(
-    ApiResponse({
+    new ApiResponse({
       success: true,
       message: "Admin found",
       admin: admin.username, // You may want to filter out sensitive fields
@@ -190,7 +192,7 @@ export let adminToken = AsyncHandler(async (req, res) => {
   //   return res
   //     .status(403)
   //     .json(
-  //       ApiErrorResponse({ message: "Unauthorized: No token provided" }).res()
+  //       new ApiErrorResponse({ message: "Unauthorized: No token provided" }).res()
   //     );
   // }
 
@@ -198,7 +200,7 @@ export let adminToken = AsyncHandler(async (req, res) => {
   // if ([accessToken_].some((field) => field.length === 0)) {
   //   return res
   //     .status(400)
-  //     .json(ApiErrorResponse({ message: "bearer token is missing" }).res());
+  //     .json(new ApiErrorResponse({ message: "bearer token is missing" }).res());
   // }
   // let decodedAccess;
   // try {
@@ -211,13 +213,13 @@ export let adminToken = AsyncHandler(async (req, res) => {
   // } catch (err) {
   //   return res
   //     .status(401)
-  //     .json(ApiErrorResponse({ message: "Access token invalid" }, 401).res());
+  //     .json(new ApiErrorResponse({ message: "Access token invalid" }, 401).res());
   // }
   // if (decodedAccess._id !== req.admin._id) {
   //   return res
   //     .status(401)
   //     .json(
-  //       ApiErrorResponse(
+  //       new ApiErrorResponse(
   //         { message: "Access token expired or invalid" },
   //         401
   //       ).res()
@@ -229,7 +231,7 @@ export let adminToken = AsyncHandler(async (req, res) => {
   //   return res
   //     .status(400)
   //     .json(
-  //       ApiErrorResponse({ message: "refresh token not found" }, 400).res()
+  //       new ApiErrorResponse({ message: "refresh token not found" }, 400).res()
   //     );
   // }
   // let decodedRefesh;
@@ -243,7 +245,7 @@ export let adminToken = AsyncHandler(async (req, res) => {
   // } catch (err) {
   //   return res
   //     .status(401)
-  //     .json(ApiErrorResponse({ message: "Refresh token invalid" }, 401).res());
+  //     .json(new ApiErrorResponse({ message: "Refresh token invalid" }, 401).res());
   // }
 
   // let admin = await Admin.findById({
@@ -260,7 +262,7 @@ export let adminToken = AsyncHandler(async (req, res) => {
   //   return res
   //     .status(400)
   //     .json(
-  //       ApiErrorResponse({ message: "Invalid or mismatched tokens" }).res()
+  //       new ApiErrorResponse({ message: "Invalid or mismatched tokens" }).res()
   //     );
   // }
 
@@ -269,6 +271,7 @@ export let adminToken = AsyncHandler(async (req, res) => {
     _id: admin._id,
     username: admin.username,
     email: admin.email,
+    role: admin.role || "admin",
   };
   // let payload = {
   //   _id: req.admin._id,
@@ -292,7 +295,9 @@ export let adminToken = AsyncHandler(async (req, res) => {
     sameSite: "Strict",
     maxAge: 1 * 7 * 24 * 60 * 60 * 1000, // 1 days
   });
-  return res.status(200).json(ApiResponse({ accessToken: accessToken }).res());
+  return res
+    .status(200)
+    .json(new ApiResponse({ accessToken: accessToken }).res());
 });
 
 export let adminLogout = AsyncHandler(async (req, res) => {
@@ -302,12 +307,12 @@ export let adminLogout = AsyncHandler(async (req, res) => {
   if (!admin) {
     return res
       .status(400)
-      .json(ApiErrorResponse({ message: "Failed to find admin" }).res());
+      .json(new ApiErrorResponse({ message: "Failed to find admin" }).res());
   }
   admin.refreshToken = null;
   await admin.save();
   res.clearCookie(adminRefreshToken);
   res.clearCookie(adminAccessToken);
   delete req.admin;
-  res.status(200).json(ApiResponse({ message: "Admin logout" }).res());
+  res.status(200).json(new ApiResponse({ message: "Admin logout" }).res());
 });

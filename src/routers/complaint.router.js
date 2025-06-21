@@ -3,11 +3,11 @@ import {
   raiseComplaint,
   replyComplaint,
   editComplaint,
-} from "./complaint.router";
+} from "../controllers/complaint.controller.js";
 
-let ComplaintRouter = express.Router();
-ComplaintRouter.post("/complaint?type=raise", raiseComplaint);
-ComplaintRouter.post("/complaint/:id?type=reply", replyComplaint);
-ComplaintRouter.post("/complaint/:id?edit=true", editComplaint);
+let complaintRouter = express.Router();
+complaintRouter.post("/complaint", raiseComplaint); //?type=raise
+complaintRouter.post("/complaint/:id/reply", replyComplaint); //?type=reply
+complaintRouter.post("/complaint/:id/edit", editComplaint); //?edit=true
 
-export default ComplaintRouter;
+export default complaintRouter;

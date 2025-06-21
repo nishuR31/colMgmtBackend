@@ -1,6 +1,6 @@
-import ApiErrorResponse from "../utils/ApiErrorResponse.js";
-import ApiResponse from "../utils/ApiResponse.js";
-import AsyncHandler from "../utils/AsyncHandler.js";
+import ApiErrorResponse from "../utils/apiErrorResponse.js";
+import ApiResponse from "../utils/apiResponse.js";
+import AsyncHandler from "../utils/asyncHandler.js";
 import Complaint from "../models/complaint.model.js";
 
 export let raiseComplaint = AsyncHandler(async (req, res) => {
@@ -8,11 +8,11 @@ export let raiseComplaint = AsyncHandler(async (req, res) => {
   if (!type || [type].some((field) => !field?.trim())) {
     return res
       .status(400)
-      .json(ApiErrorResponse({ message: "no type provided" }).res());
+      .json(new ApiErrorResponse({ message: "no type provided" }).res());
   }
   if (type.toLowerCase().trim() !== "raise") {
     return res.status(400).json(
-      ApiErrorResponse({
+      new ApiErrorResponse({
         message: "Invalid complaining query",
         type: type,
       }).res()
@@ -22,14 +22,14 @@ export let raiseComplaint = AsyncHandler(async (req, res) => {
   if ([by, message].some((field) => !field?.trim())) {
     return res
       .status(400)
-      .json(ApiErrorResponse({ message: "fields were missing" }).res());
+      .json(new ApiErrorResponse({ message: "fields were missing" }).res());
   }
   let complaint = await Complaint.create({ by: by, message: message });
   if (!complaint) {
     return res
       .status(500)
       .json(
-        ApiErrorResponse(
+        new ApiErrorResponse(
           { message: "Something wrong with filing complaint" },
           500
         ).res()
@@ -41,7 +41,7 @@ export let raiseComplaint = AsyncHandler(async (req, res) => {
   };
   req.payload = payload;
   return res.status(202).json(
-    ApiResponse({
+    new ApiResponse({
       message: "Complaint filed successfully",
       complaint: { by: message.by },
     }).res()
@@ -50,31 +50,24 @@ export let raiseComplaint = AsyncHandler(async (req, res) => {
 
 export let replyComplaint = AsyncHandler(async (req, res) => {
   let { type, id } = req.query;
-  if ([type, id].some((field) => field.length === 0)) {
+  if ([type, id].some((field) => !field?.trim())) {
     return res
       .status(400)
-      .json(ApiErrorResponse({ message: "fields were missing" }).res());
+      .json(new ApiErrorResponse({ message: "fields were missing" }).res());
   }
-  if (type.toLowerCase().trim() !== "reply") {
-    return res.status(400).json(
-      ApiErrorResponse({
-        message: "Invalid complaining type",
-        type: type,
-      }).res()
-    );
-  }
+
   let complaint = await Complaint.findById(id);
   if (!complaint) {
     return res
       .status(404)
-      .json(ApiErrorResponse({ message: "Complaint not found" }).res());
+      .json(new ApiErrorResponse({ message: "Complaint not found" }).res());
   }
 
   let { response, status, respondedBy } = req.body;
   if ([respondedBy, response, status].some((field) => field.length === 0)) {
     return res
       .status(400)
-      .json(ApiErrorResponse({ message: "fields were missing" }).res());
+      .json(new ApiErrorResponse({ message: "fields were missing" }).res());
   }
   let repliedComplaint = await Complaint.findByIdAndUpdate(
     { _id: id },
@@ -85,14 +78,14 @@ export let replyComplaint = AsyncHandler(async (req, res) => {
     return res
       .status(500)
       .json(
-        ApiErrorResponse(
+        new ApiErrorResponse(
           { message: "Something wrong with replying to the complaint" },
           500
         ).res()
       );
   }
   return res.status(202).json(
-    ApiResponse({
+    new ApiResponse({
       message: "Complaint replied successfully",
       complaint: {
         response: complaint.response,
@@ -104,7 +97,6 @@ export let replyComplaint = AsyncHandler(async (req, res) => {
 });
 
 export let editComplaint = AsyncHandler(async (req, res) => {
-  let edit = req.query.edit;
   let id = req.params.id;
   let data = req.body;
   let { response, status, respondedBy, message } = data;
@@ -115,16 +107,9 @@ export let editComplaint = AsyncHandler(async (req, res) => {
   ) {
     return res
       .status(400)
-      .json(ApiErrorResponse({ message: "fields were missing" }).res());
+      .json(new ApiErrorResponse({ message: "fields were missing" }).res());
   }
-  if (edit.toLowerCase().trim() !== "edit") {
-    return res.status(400).json(
-      ApiErrorResponse({
-        message: "Invalid edit query",
-        edit: edit,
-      }).res()
-    );
-  }
+
   let updatedComplaint = await Complaint.findByIdAndUpdate(
     { _id: id },
     { ...data },
@@ -134,14 +119,14 @@ export let editComplaint = AsyncHandler(async (req, res) => {
     return res
       .status(403)
       .json(
-        ApiErrorResponse(
+        new ApiErrorResponse(
           { message: "Something wrong with replying to the complaint" },
           403
         ).res()
       );
   }
   return res.status(202).json(
-    ApiResponse({
+    new ApiResponse({
       message: "Complaint updated successfully",
     }).res()
   );

@@ -1,7 +1,7 @@
 export default class ApiErrorResponse extends Error {
-  constructor(err, statusCode = 500) {
-    super(err.message || "Internal Error occured.");
-    this.name = err.name || "Api error";
+  constructor(err, statusCode = 400) {
+    super(err.message || "Some internal Error occured.");
+    this.name = err.name || "Error occured when making a request ";
     this.statusCode = statusCode;
     this.stack = err.stack || new Error().stack;
   }

@@ -1,8 +1,8 @@
 import express from "express";
-import { subEntry,subEdit } from "../controllers/subject.controller";
-let SubjectRouter = express.Router();
+import { subEntry, subEdit } from "../controllers/subject.controller.js";
+let subjectRouter = express.Router();
 
-SubjectRouter.post("/subject/:username", subEntry);
-SubjectRouter.post("/subject/:username?edit=true", subEdit);
+subjectRouter.post("/subject/:username", subEntry);
+subjectRouter.post("/subject/:username/edit", subEdit); //?edit=true
 
-export default SubjectRouter;
+export default subjectRouter;

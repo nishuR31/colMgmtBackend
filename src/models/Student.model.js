@@ -1,10 +1,10 @@
 import mongoose from "mongoose";
-import RequireField from "../utils/RequireField.js";
+import RequireField from "../utils/requireField.js";
 import validator from "validator";
 import bcryptjs from "bcryptjs";
-import { salt } from "../Constants.js";
+import { salt } from "../constants.js";
 
-const StudentSchema = new mongoose.Schema(
+const studentSchema = new mongoose.Schema(
   {
     refreshToken: {
       type: String,
@@ -77,28 +77,35 @@ const StudentSchema = new mongoose.Schema(
       required: [true, RequireField("role")],
       enum: { values: ["student"], message: "Invalid role" },
     },
-    course: {
-      type: String,
-      required: [true, RequireField("Course")],
-      trim: true,
-    },
+    // course: {
+    //   type: String,
+    //   required: [true, RequireField("Course")],
+    //   trim: true,
+    // },
 
-    marks: [{ type: mongoose.Schema.Types.ObjectId, ref: "Marks" }],
+    // marks: [
+    //   { default: [], type: mongoose.Schema.Types.ObjectId, ref: "Marks" },
+    // ],
     program: {
       type: String,
       required: [true, RequireField("Program")],
     },
     subjects: [{ type: mongoose.Schema.Types.ObjectId, ref: "Subject" }],
-    guardianContactInfo: {
+    guardianContactNum: {
       type: String,
       required: [true, RequireField("Contact number of guardian")],
-      match: [/^[6-9]\d{9}$/, "Must be a valid Indian phone number"],
+      validate: {
+        validator: function (phone) {
+          return validator.isMobilePhone(phone, "en-IN");
+        },
+        message: "Invalid number format",
+      },
     },
   },
   { timestamps: true }
 );
 
-StudentSchema.pre("save", async function (next) {
+studentSchema.pre("save", async function (next) {
   try {
     if (!this.isModified("password")) {
       return next();
@@ -113,7 +120,7 @@ StudentSchema.pre("save", async function (next) {
   }
 });
 
-StudentSchema.pre("findOneAndUpdate", async function (next) {
+studentSchema.pre("findOneAndUpdate", async function (next) {
   try {
     if (!this.isModified("password")) {
       return next();
@@ -128,7 +135,7 @@ StudentSchema.pre("findOneAndUpdate", async function (next) {
   }
 });
 
-StudentSchema.methods.comparePassword = async function (password) {
+studentSchema.methods.comparePassword = async function (password) {
   try {
     let isMatch = await bcryptjs.compare(password, this.password);
     if (!isMatch) {
@@ -142,5 +149,5 @@ StudentSchema.methods.comparePassword = async function (password) {
   }
 };
 
-let Student = mongoose.model("Student", StudentSchema);
+let Student = mongoose.model("Student", studentSchema);
 export default Student;

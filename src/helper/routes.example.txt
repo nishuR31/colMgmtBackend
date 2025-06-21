@@ -1,0 +1,43 @@
+//routes:
+
+base route: /api/v1
+
+admin: /admin
+    signin:/signup
+    signup:/signin
+    username:username
+    delete:/del/:id
+    edit:/:username/edit
+    token:/:username/token
+
+complaint:/complaint
+        file complaint:/complaint
+        reply:/complaint/:id/reply
+        edit:/complaint/:id/edit
+
+faculty:/falculty
+    signup:/signup
+    signin:/signin
+    delete:/del/:id
+    username:/:username
+    edit:/:username/edit
+    token:/:username/token
+
+
+student: /student
+    signin:/signin
+    signup:/signup
+    username:/:username
+    delete:/del:id
+    edit:/:username/edit
+    token:/:username/token
+
+
+subject:/subject
+    subject:/subject/:username
+    edit:/subject/:username/edit
+
+
+marks:/student/marks
+    set marks:"/:username/
+    edit:/:username/edit

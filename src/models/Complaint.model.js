@@ -1,8 +1,8 @@
 import mongoose from "mongoose";
-import RequireField from "../utils/RequireField.js";
-import { status } from "../Constants.js";
+import RequireField from "../utils/requireField.js";
+import { status } from "../constants.js";
 
-let ComlaintSchema = new mongoose.Schema(
+let comlaintSchema = new mongoose.Schema(
   {
     by: {
       type: String,
@@ -34,5 +34,5 @@ let ComlaintSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-let Complaint = mongoose.model("Complaint", ComlaintSchema);
+let Complaint = mongoose.model("Complaint", comlaintSchema);
 export default Complaint;

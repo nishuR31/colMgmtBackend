@@ -8,13 +8,13 @@ import {
   adminEdit,
 } from "../controllers/admin.controller.js";
 
-let AdminRouter = express.Router();
+let adminRouter = express.Router();
 
-AdminRouter.post("/signup", adminSignup);
-AdminRouter.post("/signin", adminSignin);
-AdminRouter.get("/:username", adminUser);
-AdminRouter.get("/:username?edit=true", adminEdit);
-AdminRouter.get("/:username/token", adminToken);
-AdminRouter.post("/del/:id", adminDel);
+adminRouter.post("/signup", adminSignup);
+adminRouter.post("/signin", adminSignin);
+adminRouter.get("/:username", adminUser);
+adminRouter.get("/:username/edit", adminEdit); //?edit=true
+adminRouter.get("/:username/token", adminToken);
+adminRouter.post("/del/:id", adminDel);
 
-export default AdminRouter;
+export default adminRouter;

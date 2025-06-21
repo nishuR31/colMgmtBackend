@@ -1,8 +1,8 @@
-import { generateTokenOptions, tokenSecret } from "../Constants.js";
+import { generateTokenOptions, tokenSecret } from "../constants.js";
 import Faculty from "../models/falculty.model.js";
-import ApiErrorResponse from "../utils/ApiErrorResponse.js";
-import ApiResponse from "../utils/ApiResponse.js";
-import AsyncHandler from "../utils/AsyncHandler.js";
+import ApiErrorResponse from "../utils/apiErrorResponse.js";
+import ApiResponse from "../utils/apiResponse.js";
+import AsyncHandler from "../utils/asyncHandler.js";
 import { verify, tokenGen } from "../utils/jwtTokens.js";
 
 export let facSignup = AsyncHandler(async (req, res) => {
@@ -63,7 +63,6 @@ export let facSignup = AsyncHandler(async (req, res) => {
 
 export let facEdit = AsyncHandler(async (req, res) => {
   const data = req.body;
-  let edit = req.query.edit;
   let {
     username,
     fullName,
@@ -83,7 +82,6 @@ export let facEdit = AsyncHandler(async (req, res) => {
       email,
       password,
       dob,
-      edit,
       phone,
       role,
       bloodGroup,
@@ -93,12 +91,7 @@ export let facEdit = AsyncHandler(async (req, res) => {
   ) {
     return res
       .status(400)
-      .json(ApiErrorResponse({ message: "fields were missing" }).res());
-  }
-  if (edit.toLowerCase().trim() !== "edit") {
-    return res
-      .status(400)
-      .json(ApiErrorResponse({ message: "Invalid edit query" }).res());
+      .json(new ApiErrorResponse({ message: "fields were missing" }).res());
   }
   let faculty = await Faculty.findOne({
     username,
@@ -107,7 +100,7 @@ export let facEdit = AsyncHandler(async (req, res) => {
   if (!faculty) {
     return res
       .status(404)
-      .json(ApiErrorResponse({ message: "faculty dont exist" }, 404).res());
+      .json(new ApiErrorResponse({ message: "faculty dont exist" }, 404).res());
   }
 
   const newFaculty = await Faculty.findOneAndUpdate(
@@ -118,10 +111,12 @@ export let facEdit = AsyncHandler(async (req, res) => {
   if (!newFaculty) {
     return res
       .status(500)
-      .json(ApiResponse({ message: "faculty creation failed" }, 500).res());
+      .json(
+        new ApiErrorResponse({ message: "faculty creation failed" }, 500).res()
+      );
   }
   return res.status(201).json(
-    ApiResponse({
+    new ApiResponse({
       success: true,
       message: "Faculty created successfully",
       Faculty: { username: newFaculty.username, fullName: newFaculty.fullName },
@@ -134,24 +129,31 @@ export let facDel = AsyncHandler(async (req, res) => {
   if ([id].some((field) => !field?.trim() || !id)) {
     return res
       .status(400)
-      .json(ApiErrorResponse({ message: "fields were missing" }).res());
+      .json(new ApiErrorResponse({ message: "fields were missing" }).res());
   }
   if (req?.faculty && req?.faculty._id !== id) {
     return res
       .status(400)
-      .json(ApiErrorResponse({ message: "Cant delete other faculties" }).res());
+      .json(
+        new ApiErrorResponse({ message: "Cant delete other faculties" }).res()
+      );
   }
   let faculty = await Faculty.findByIdAndDelete({ _id: id });
   if (!faculty) {
     return res
       .status(200)
-      .json(ApiResponse({ message: `Faculty can\'t be removed` }, 400).res());
+      .json(
+        new ApiErrorResponse(
+          { message: `Faculty can\'t be removed` },
+          400
+        ).res()
+      );
   }
 
   return res
     .status(200)
     .json(
-      ApiResponse(
+      new ApiResponse(
         { message: "Faculty successfully deleted", faculty: faculty.username },
         200
       ).res()
@@ -165,7 +167,7 @@ export let facSignin = AsyncHandler(async (req, res) => {
   ) {
     return res
       .status(400)
-      .json(ApiErrorResponse({ message: "fields were missing" }).res());
+      .json(new ApiErrorResponse({ message: "fields were missing" }).res());
   }
   const faculty = await Faculty.findOne({
     username,
@@ -175,14 +177,18 @@ export let facSignin = AsyncHandler(async (req, res) => {
     return res
       .status(404)
       .json(
-        ApiErrorResponse({ message: "invalid credentials" }, 404, false).res()
+        new ApiErrorResponse(
+          { message: "invalid credentials" },
+          404,
+          false
+        ).res()
       );
   }
   if (role.toLowerCase().trim() !== "faculty") {
     return res
       .status(404)
       .json(
-        ApiErrorResponse(
+        new ApiErrorResponse(
           { message: "Access denied: Not Faculty" },
           404,
           false
@@ -195,7 +201,11 @@ export let facSignin = AsyncHandler(async (req, res) => {
     return res
       .status(400)
       .json(
-        ApiErrorResponse({ message: "invalid credentials" }, 400, false).res()
+        new ApiErrorResponse(
+          { message: "invalid credentials" },
+          400,
+          false
+        ).res()
       );
   }
 
@@ -203,6 +213,7 @@ export let facSignin = AsyncHandler(async (req, res) => {
     _id: faculty._id,
     username: faculty.username,
     email: faculty.email,
+    role: faculty.role || "faculty",
   };
   req.faculty = payload;
 
@@ -223,7 +234,9 @@ export let facSignin = AsyncHandler(async (req, res) => {
     sameSite: "Strict",
     maxAge: 1 * 7 * 24 * 60 * 60 * 1000, // 1 days
   });
-  return res.status(200).json(ApiResponse({ accessToken: accessToken }).res());
+  return res
+    .status(200)
+    .json(new ApiResponse({ accessToken: accessToken }).res());
 });
 
 export let facUser = AsyncHandler(async (req, res) => {
@@ -231,20 +244,20 @@ export let facUser = AsyncHandler(async (req, res) => {
   if ([username].some((field) => !field?.trim())) {
     return res
       .status(400)
-      .json(ApiErrorResponse({ message: "fields were missing" }).res());
+      .json(new ApiErrorResponse({ message: "fields were missing" }).res());
   }
   const faculty = await Faculty.findOne({ username });
   if (!faculty) {
     return res
       .status(404)
       .json(
-        ApiErrorResponse({ message: "Faculty not found" }, 404, false).res()
+        new ApiErrorResponse({ message: "Faculty not found" }, 404, false).res()
       );
     //   res?.redirect("/Faculty/signup");
   }
 
   return res.status(200).json(
-    ApiResponse({
+    new ApiResponse({
       success: true,
       message: "Faculty found",
       faculty: faculty.username, // You may want to filter out sensitive fields
@@ -258,7 +271,7 @@ export let facToken = AsyncHandler(async (req, res, next) => {
   //   return res
   //     .status(401)
   //     .json(
-  //       ApiErrorResponse({ message: "Unauthorized: No token provided" }).res()
+  //       new ApiErrorResponse({ message: "Unauthorized: No token provided" }).res()
   //     );
   // }
 
@@ -266,7 +279,7 @@ export let facToken = AsyncHandler(async (req, res, next) => {
   // if (!accessToken_ || accessToken_.length === 0) {
   //   return res
   //     .status(400)
-  //     .json(ApiErrorResponse({ message: "access token is missing" }).res());
+  //     .json(new ApiErrorResponse({ message: "access token is missing" }).res());
   // }
 
   // let decodedAccess;
@@ -281,7 +294,7 @@ export let facToken = AsyncHandler(async (req, res, next) => {
   //   return res
   //     .status(401)
   //     .json(
-  //       ApiErrorResponse(
+  //       new ApiErrorResponse(
   //         { message: "Access token verification invalid" },
   //         401
   //       ).res()
@@ -292,7 +305,7 @@ export let facToken = AsyncHandler(async (req, res, next) => {
   //   return res
   //     .status(400)
   //     .json(
-  //       ApiErrorResponse(
+  //       new ApiErrorResponse(
   //         { Message: "expired or invalid access token" },
   //         400
   //       ).res()
@@ -303,7 +316,7 @@ export let facToken = AsyncHandler(async (req, res, next) => {
   // if (!refreshToken_ || refreshToken_.length === 0) {
   //   return res
   //     .status(404)
-  //     .json(ApiErrorResponse({ message: "no refreshToken found" }, 404).res());
+  //     .json(new ApiErrorResponse({ message: "no refreshToken found" }, 404).res());
   // }
   // let decodedRefresh = verify(
   //   refreshToken_,
@@ -322,7 +335,7 @@ export let facToken = AsyncHandler(async (req, res, next) => {
   //   return res
   //     .status(404)
   //     .json(
-  //       ApiErrorResponse({ message: "Invalid or mismatched tokens" }, 404).res()
+  //       new ApiErrorResponse({ message: "Invalid or mismatched tokens" }, 404).res()
   //     );
   // }
   let faculty = await Faculty.findById(req.faculty._id);
@@ -330,6 +343,7 @@ export let facToken = AsyncHandler(async (req, res, next) => {
     _id: faculty._id,
     username: faculty.username,
     email: faculty.email,
+    role: faculty.role || "faculty",
   };
   let { accessToken, refreshToken } = tokenGen(
     payload,
@@ -348,7 +362,9 @@ export let facToken = AsyncHandler(async (req, res, next) => {
     sameSite: "Strict",
     maxAge: 1 * 7 * 24 * 60 * 60 * 1000, // 1 days
   });
-  return res.status(200).json(ApiResponse({ accessToken: accessToken }, 200));
+  return res
+    .status(200)
+    .json(new ApiResponse({ accessToken: accessToken }, 200));
 });
 
 export let faclogout = AsyncHandler(async (req, res) => {
@@ -356,18 +372,20 @@ export let faclogout = AsyncHandler(async (req, res) => {
   if ([_id, username, email].some((field) => !field?.trim())) {
     return res
       .status(400)
-      .json(ApiErrorResponse({ message: "empty values provided" }).res());
+      .json(new ApiErrorResponse({ message: "empty values provided" }).res());
   }
   let faculty = await Faculty.findOne({ _id, $or: [{ username }, { email }] });
   if (!faculty) {
     return res
       .status(404)
-      .json(ApiErrorResponse({ message: "faculty not found" }).res());
+      .json(new ApiErrorResponse({ message: "faculty not found" }).res());
   }
 
   faculty.refreshTokwn = null;
   res.clearCookie(facAccesstoken);
   res.clearCookie(facResfreshtoken);
   delete req.faculty;
-  return res.status(200).json(ApiResponse({ message: "Faculty logout" }).res());
+  return res
+    .status(200)
+    .json(new ApiResponse({ message: "Faculty logout" }).res());
 });
