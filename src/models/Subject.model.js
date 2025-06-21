@@ -42,4 +42,5 @@ let SubjectSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-export default mongoose.model("Subject", SubjectSchema);
+let Subject = mongoose.model("Subject", SubjectSchema);
+export default Subject;

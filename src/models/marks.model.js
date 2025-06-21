@@ -27,4 +27,5 @@ const MarksSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-export default mongoose.model("Marks", MarksSchema);
+let Marks = mongoose.model("Marks", MarksSchema);
+export default Marks;

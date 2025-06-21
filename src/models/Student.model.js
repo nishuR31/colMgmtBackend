@@ -142,4 +142,5 @@ StudentSchema.methods.comparePassword = async function (password) {
   }
 };
 
-export default mongoose.model("Student", StudentSchema);
+let Student = mongoose.model("Student", StudentSchema);
+export default Student;

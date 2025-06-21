@@ -132,4 +132,5 @@ FacultySchema.methods.comparePassword = async function (password) {
   }
 };
 
-export default mongoose.model("Faculty", FacultySchema);
+let Faculty=mongoose.model("Faculty", FacultySchema);
+export default Faculty;

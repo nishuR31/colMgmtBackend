@@ -34,4 +34,5 @@ let ComlaintSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-export default mongoose.model("Complaint", ComlaintSchema);
+let Complaint = mongoose.model("Complaint", ComlaintSchema);
+export default Complaint;

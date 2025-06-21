@@ -45,7 +45,7 @@ export let stuSignup = AsyncHandler(async (req, res) => {
 
   let student = await Student.findOne({
     username,
-    $or: [{ fullName }, { phone }, { email }],
+    $or: [{ fullName }, { email }],
   });
   if (student) {
     return res
@@ -106,14 +106,14 @@ export let stuEdit = AsyncHandler(async (req, res) => {
       .status(400)
       .json(ApiErrorResponse({ message: "Missing fields" }).res());
   }
-  if (edit.toLowerCase() !== "edit") {
+  if (edit.toLowerCase().trim() !== "edit") {
     return res
       .status(400)
       .json(ApiErrorResponse({ message: "invalid Edit query" }, 400).res());
   }
   let student = await Student.findOne({
     username,
-    $or: [{ fullName }, { phone }, { email }],
+    $or: [{ fullName }, { email }],
   });
   if (!student) {
     return res
@@ -121,7 +121,7 @@ export let stuEdit = AsyncHandler(async (req, res) => {
       .json(ApiErrorResponse({ message: "Student dont exist" }, 404).res());
   }
   const newStudent = await Student.findOneAndUpdate(
-    { username, $or: [{ email }, { phone }] },
+    { username, $or: [{ email }] },
     { ...data },
     { new: true, validateBeforeSave: false }
   );
@@ -177,7 +177,7 @@ export let stuSignin = AsyncHandler(async (req, res) => {
 
   const student = await Student.findOne({
     username,
-    $or: [{ phone }, { email }],
+    $or: [{ email }],
   });
   if (!student) {
     return res
@@ -186,7 +186,7 @@ export let stuSignin = AsyncHandler(async (req, res) => {
         ApiErrorResponse({ message: "invalid credentials" }, 404, false).res()
       );
   }
-  if (role !== "student") {
+  if (role.toLowerCase().trim() !== "student") {
     return res
       .status(406)
       .json(
@@ -218,27 +218,32 @@ export let stuSignin = AsyncHandler(async (req, res) => {
   );
   student.refreshToken = refreshToken;
   await student.save({ validateBeforeSave: false });
-  res.cookie("refreshToken", refreshToken, {
+  res.cookie("stuRefreshToken", refreshToken, {
     httpOnly: true,
     sameSite: "Strict",
     maxAge: 15 * 7 * 24 * 60 * 60 * 1000, // 15 days
+  });
+  res.cookie("stuAccessoken", refreshToken, {
+    httpOnly: true,
+    sameSite: "Strict",
+    maxAge: 1 * 7 * 24 * 60 * 60 * 1000, // 15 days
   });
   return res.status(200).json(ApiResponse({ accessToken: accessToken }).res());
 });
 
 export let stuDel = AsyncHandler(async (req, res) => {
-  let id = req.params?.id;
+  let id = req.params.id;
   if ([id].some((field) => !field?.trim() || !id)) {
     return res
       .status(400)
       .json(ApiErrorResponse({ message: "fields were missing" }).res());
   }
-  if (req.student && req?.student._id.toString() === id) {
+  if (req.student && req.student._id.toString() !== id) {
     return res
       .status(403)
       .json(
         ApiErrorResponse(
-          { message: "You cannot delete your student id" },
+          { message: "You cannot delete other student id" },
           403
         ).res()
       );
@@ -262,75 +267,113 @@ export let stuDel = AsyncHandler(async (req, res) => {
 });
 
 export let stuToken = AsyncHandler(async (req, res, next) => {
-  const authHeader = req.headers["authorization"];
-  if (!authHeader || !authHeader.startsWith("Bearer ")) {
-    return res
-      .status(401)
-      .json(
-        ApiErrorResponse({ message: "Unauthorized: No token provided" }).res()
-      );
-  }
-  const accessToken_ = authHeader.split(" ")[1];
-  if (!accessToken_ || accessToken_.length === 0) {
-    return res
-      .status(400)
-      .json(ApiErrorResponse({ message: "No access token found" }).res());
-  }
-  let decodedAccess;
-  try {
-    decodedAccess = verify(
-      accessToken_,
-      tokenSecret.access,
-      generateTokenOptions,
-      "access"
-    );
-  } catch (err) {
-    return res
-      .status(401)
-      .json(ApiErrorResponse({ message: "Access token invalid" }, 401).res());
-  }
-  if (String(decodedAccess._id) !== String(req.student._id)) {
-    return res
-      .status(400)
-      .json(
-        ApiErrorResponse(
-          { Message: "expired or invalid access token" },
-          400
-        ).res()
-      );
-  }
-  let refreshToken_ = req.cookies.refreshToken;
-  if (!refreshToken_ || refreshToken_.length === 0) {
-    return res
-      .status(404)
-      .json(ApiErrorResponse({ message: "no refresh Token found" }, 404).res());
-  }
-  let decodedRefresh = verify(
-    refreshToken_,
-    tokenSecret.refresh,
-    generateTokenOptions,
-    "refresh"
-  );
-  let student = await Student.findOne({ _id: decodedRefresh._id });
-  if (
-    String(decodedAccess._id) !== String(student._id) ||
-    String(decodedRefresh._id) !== String(student._id) ||
-    String(decodedAccess._id) !== String(req.student._id) ||
-    String(decodedAccess.id) !== String(decodedRefresh.id) ||
-    String(req.student._id) !== String(decodedRefresh.id)
-  ) {
-    return res
-      .status(404)
-      .json(
-        ApiErrorResponse({ message: "Invalid or mismatched tokens" }, 404).res()
-      );
-  }
+  // const authHeader = req.headers["authorization"];
+  // if (!authHeader || !authHeader.startsWith("Bearer ")) {
+  //   return res
+  //     .status(401)
+  //     .json(
+  //       ApiErrorResponse({ message: "Unauthorized: No token provided" }).res()
+  //     );
+  // }
+  // const accessToken_ = authHeader.split(" ")[1];
+  // if (!accessToken_ || accessToken_.length === 0) {
+  //   return res
+  //     .status(400)
+  //     .json(ApiErrorResponse({ message: "No access token found" }).res());
+  // }
+  // let decodedAccess;
+  // try {
+  //   decodedAccess = verify(
+  //     accessToken_,
+  //     tokenSecret.access,
+  //     generateTokenOptions,
+  //     "access"
+  //   );
+  // } catch (err) {
+  //   return res
+  //     .status(401)
+  //     .json(ApiErrorResponse({ message: "Access token invalid" }, 401).res());
+  // }
+  // if (String(decodedAccess._id) !== String(req.student._id)) {
+  //   return res
+  //     .status(400)
+  //     .json(
+  //       ApiErrorResponse(
+  //         { Message: "expired or invalid access token" },
+  //         400
+  //       ).res()
+  //     );
+  // }
+  // let refreshToken_ = req.cookies.refreshToken;
+  // if (!refreshToken_ || refreshToken_.length === 0) {
+  //   return res
+  //     .status(404)
+  //     .json(ApiErrorResponse({ message: "no refresh Token found" }, 404).res());
+  // }
+  // let decodedRefresh = verify(
+  //   refreshToken_,
+  //   tokenSecret.refresh,
+  //   generateTokenOptions,
+  //   "refresh"
+  // );
+  // let student = await Student.findOne({ _id: decodedRefresh._id });
+  // if (
+  //   String(decodedAccess._id) !== String(student._id) ||
+  //   String(decodedRefresh._id) !== String(student._id) ||
+  //   String(decodedAccess._id) !== String(req.student._id) ||
+  //   String(decodedAccess.id) !== String(decodedRefresh.id) ||
+  //   String(req.student._id) !== String(decodedRefresh.id)
+  // ) {
+  //   return res
+  //     .status(404)
+  //     .json(
+  //       ApiErrorResponse({ message: "Invalid or mismatched tokens" }, 404).res()
+  //     );
+  // }
+  let student = await Student.findById(req.student._id);
+  let payload = {
+    _id: student._id,
+    username: student.username,
+    email: student.email,
+  };
   let { accessToken, refreshToken } = tokenGen(
-    decodedRefresh,
+    payload,
     tokenSecret,
     generateTokenOptions
   );
   student.refreshToken = refreshToken;
   await student.save({ validateBeforeSave: false });
+  res.cookie("stuRefreshToken", refreshToken, {
+    httpOnly: true,
+    sameSite: "Strict",
+    maxAge: 15 * 7 * 24 * 60 * 60 * 1000, // 15 days
+  });
+  res.cookie("stuAccessToken", accessToken, {
+    httpOnly: true,
+    sameSite: "Strict",
+    maxAge: 1 * 7 * 24 * 60 * 60 * 1000, // 1 days
+  });
   return res.status(200).json(ApiResponse({ accessToken: accessToken }, 200));
+});
+
+export let stuLogout = AsyncHandler(async (req, res) => {
+  let { _id, username, email } = req.student;
+  if ([_id, username, email].some((field) => !field?.trim())) {
+    return res
+      .status(400)
+      .json(ApiErrorResponse({ message: "Empty values provided" }).res());
+  }
+  let student = await Student.findOne({ _id, $or: [{ username, email }] });
+  if (!student) {
+    return res
+      .status(404)
+      .json(ApiErrorResponse({ message: "student not found" }, 404).res());
+  }
+
+  student.refreshToken = null;
+  await student.save();
+  delete req.student;
+  res.clearCookie(stuAccessToken);
+  res.clearCookie(stuRefreshToken);
+  res.status(200).json(ApiResponse({ message: "student logout" }).res());
 });
