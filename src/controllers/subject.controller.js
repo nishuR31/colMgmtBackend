@@ -1,8 +1,8 @@
 import Student from "../models/student.model.js";
 import Subject from "../models/subject.model.js";
-import ApiErrorResponse from "../utils/ApiErrorResponse.js";
-import ApiResponse from "../utils/ApiResponse.js";
-import AsyncHandler from "../utils/AsyncHandler.js";
+import ApiErrorResponse from "../utils/apiErrorResponse.js";
+import ApiResponse from "../utils/apiResponse.js";
+import AsyncHandler from "../utils/asyncHandler.js";
 
 export let subEntry = AsyncHandler(async (req, res) => {
   const data = req.body;
@@ -20,7 +20,7 @@ export let subEntry = AsyncHandler(async (req, res) => {
   ) {
     return res
       .status(400)
-      .json(ApiErrorResponse({ message: "Some fields are missing" }).res());
+      .json(new ApiErrorResponse({ message: "Some fields are missing" }).res());
   }
 
   const existingSubject = await Subject.findOne({
@@ -31,7 +31,7 @@ export let subEntry = AsyncHandler(async (req, res) => {
   if (existingSubject) {
     return res.status(409).json(
       // 409 = conflict
-      ApiErrorResponse({
+      new ApiErrorResponse({
         message: "Subject already exists",
         code: code,
       }).res()
@@ -42,20 +42,20 @@ export let subEntry = AsyncHandler(async (req, res) => {
   if (!newSubject) {
     return res
       .status(500)
-      .json(ApiErrorResponse({ message: "Error saving subject" }).res());
+      .json(new ApiErrorResponse({ message: "Error saving subject" }).res());
   }
   let student = await Student.findOne({ username: username });
   if (!student) {
     return res
       .status(404)
-      .json(ApiErrorResponse({ message: "Student dont exist" }).res());
+      .json(new ApiErrorResponse({ message: "Student dont exist" }).res());
   }
 
   student.subjects.push(newSubject._id);
   await student.save(); // must persist it
 
   return res.status(201).json(
-    ApiResponse({
+    new ApiResponse({
       message: "Subject created successfully",
       code: newSubject.code,
       name: newSubject.name,
@@ -67,7 +67,6 @@ export let subEntry = AsyncHandler(async (req, res) => {
 export let subEdit = AsyncHandler(async (req, res) => {
   const data = req.body;
   const username = req.params.username;
-  const edit = req.query.edit;
 
   const { code, name, department, credit, semester } = data;
 
@@ -82,13 +81,7 @@ export let subEdit = AsyncHandler(async (req, res) => {
   ) {
     return res
       .status(400)
-      .json(ApiErrorResponse({ message: "Some fields are missing" }).res());
-  }
-
-  if (edit?.toLowerCase() !== "edit") {
-    return res
-      .status(400)
-      .json(ApiErrorResponse({ message: "Invalid editing way" }).res());
+      .json(new ApiErrorResponse({ message: "Some fields are missing" }).res());
   }
 
   const updatedSubject = await Subject.findOneAndUpdate(
@@ -100,21 +93,23 @@ export let subEdit = AsyncHandler(async (req, res) => {
   if (!updatedSubject) {
     return res
       .status(404)
-      .json(ApiErrorResponse({ message: "Subject editing failed" }, 404).res());
+      .json(
+        new ApiErrorResponse({ message: "Subject editing failed" }, 404).res()
+      );
   }
 
   let student = await Student.findOne({ username: username });
   if (!student) {
     return res
       .status(404)
-      .json(ApiErrorResponse({ message: "Student dont exist" }).res());
+      .json(new ApiErrorResponse({ message: "Student dont exist" }).res());
   }
 
   student.subjects.push(updatedSubject._id);
   await student.save(); // must persist it
 
   return res.status(200).json(
-    ApiResponse({
+    new ApiResponse({
       message: "Subject updated successfully",
       code: updatedSubject.code,
       name: updatedSubject.name,

@@ -1,10 +1,10 @@
 import mongoose from "mongoose";
-import RequireField from "../utils/RequireField.js";
+import RequireField from "../utils/requireField.js";
 import validator from "validator";
 import bcryptjs from "bcryptjs";
-import { salt, departments } from "../Constants.js";
+import { salt, departments } from "../constants.js";
 
-const FacultySchema = new mongoose.Schema(
+const facultySchema = new mongoose.Schema(
   {
     refreshToken: {
       type: String,
@@ -88,7 +88,7 @@ const FacultySchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-FacultySchema.pre("save", async function (next) {
+facultySchema.pre("save", async function (next) {
   try {
     if (!this.isModified("password")) {
       return next();
@@ -103,7 +103,7 @@ FacultySchema.pre("save", async function (next) {
   }
 });
 
-FacultySchema.pre("findOneAndUpdate", async function (next) {
+facultySchema.pre("findOneAndUpdate", async function (next) {
   try {
     if (!this.isModified("password")) {
       return next();
@@ -118,7 +118,7 @@ FacultySchema.pre("findOneAndUpdate", async function (next) {
   }
 });
 
-FacultySchema.methods.comparePassword = async function (password) {
+facultySchema.methods.comparePassword = async function (password) {
   try {
     let isMatch = await bcryptjs.compare(password, this.password);
     if (!isMatch) {
@@ -132,4 +132,5 @@ FacultySchema.methods.comparePassword = async function (password) {
   }
 };
 
-export default mongoose.model("Faculty", FacultySchema);
+let Faculty = mongoose.model("Faculty", facultySchema);
+export default Faculty;

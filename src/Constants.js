@@ -31,8 +31,8 @@ export function generateTokenOptions(type = "access") {
   return {
     expiresIn: type.toLowerCase() === "access" ? "1d" : "15d",
     issuer: "Nishan and Nishant",
-    audience: "college-portal",
-    subject: "token options",
+    audience: "college-portal-users",
+    subject: "token options generator",
   };
 }
 

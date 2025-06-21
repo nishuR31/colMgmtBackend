@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
-import RequireField from "../utils/RequireField.js";
+import RequireField from "../utils/requireField.js";
 
-const MarksSchema = new mongoose.Schema(
+const marksSchema = new mongoose.Schema(
   {
     username: {
       type: String,
@@ -27,4 +27,5 @@ const MarksSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-export default mongoose.model("Marks", MarksSchema);
+let Marks = mongoose.model("Marks", marksSchema);
+export default Marks;

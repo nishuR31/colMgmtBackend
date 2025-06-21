@@ -1,10 +1,10 @@
 import mongoose from "mongoose";
-import RequireField from "../utils/RequireField.js";
-import { admin, password, salt } from "../Constants.js";
+import RequireField from "../utils/requireField.js";
+import { admin, password, salt } from "../constants.js";
 import bcryptjs from "bcryptjs";
 import validator from "validator";
 
-const AdminSchema = new mongoose.Schema(
+const adminSchema = new mongoose.Schema(
   {
     refreshToken: {
       type: String,
@@ -55,7 +55,7 @@ const AdminSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-AdminSchema.pre("save", async function (next) {
+adminSchema.pre("save", async function (next) {
   try {
     if (!this.isModified("password")) {
       return next();
@@ -70,7 +70,7 @@ AdminSchema.pre("save", async function (next) {
   }
 });
 
-AdminSchema.pre("findOneAndUpdate", async function (next) {
+adminSchema.pre("findOneAndUpdate", async function (next) {
   try {
     if (!this.isModified("password")) {
       return next();
@@ -85,7 +85,7 @@ AdminSchema.pre("findOneAndUpdate", async function (next) {
   }
 });
 
-AdminSchema.methods.comparePassword = async function (password) {
+adminSchema.methods.comparePassword = async function (password) {
   try {
     let isMatch = await bcryptjs.compare(password, this.password);
     if (!isMatch) {
@@ -99,4 +99,6 @@ AdminSchema.methods.comparePassword = async function (password) {
   }
 };
 
-export default mongoose.model("Admin", AdminSchema);
+let Admin = mongoose.model("Admin", adminSchema);
+
+export default Admin;

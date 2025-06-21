@@ -1,8 +1,8 @@
 import mongoose from "mongoose";
-import { departments } from "../utils/constants.js";
-import RequireField from "../utils/RequireField.js";
+import { departments } from "../constants.js";
+import RequireField from "../utils/requireField.js";
 
-let SubjectSchema = new mongoose.Schema(
+let subjectSchema = new mongoose.Schema(
   {
     username: {
       type: String,
@@ -42,4 +42,5 @@ let SubjectSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-export default mongoose.model("Subject", SubjectSchema);
+let Subject = mongoose.model("Subject", subjectSchema);
+export default Subject;

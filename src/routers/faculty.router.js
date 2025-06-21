@@ -7,15 +7,15 @@ import {
   facToken,
   facUser,
   facEdit,
-} from "../controllers/faculty,controller.js";
+} from "../controllers/faculty.controller.js";
 
-let FacultyRouter = express.Router();
+let facultyRouter = express.Router();
 
-FacultyRouter.post("/signup", facSignup);
-FacultyRouter.post("/signin", facSignin);
-FacultyRouter.post("/del/:id", facDel);
-FacultyRouter.get("/:username", facUser);
-FacultyRouter.get("/:username?edit=true", facEdit);
-FacultyRouter.post("/:username/token", facToken); //
+facultyRouter.post("/signup", facSignup);
+facultyRouter.post("/signin", facSignin);
+facultyRouter.post("/del/:id", facDel);
+facultyRouter.get("/:username", facUser);
+facultyRouter.get("/:username/edit", facEdit); //?edit=true
+facultyRouter.post("/:username/token", facToken); //
 
-export default FacultyRouter;
+export default facultyRouter;
