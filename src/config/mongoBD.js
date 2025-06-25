@@ -6,10 +6,7 @@ let altasUri = process.env.MONGODB_URI_ALTAS;
 let localUri = process.env.MONGODB_URI_LOCAL;
 export default async function connectDb() {
   try {
-    let connection = await mongoose.connect(
-      // altasUri
-      localUri
-    );
+    let connection = await mongoose.connect(localUri);
     console.log(
       `MongoDB Connection established successfully:${connection.connection.host}`
     );

@@ -224,14 +224,16 @@ export let facSignin = AsyncHandler(async (req, res) => {
   );
   faculty.refreshToken = refreshToken;
   await faculty.save();
-  res.cookie("facRefreshToken", refreshToken, {
+  res.cookie("facultyRefreshToken", refreshToken, {
     httpOnly: true,
+    path: "/faculty",
     sameSite: "Strict",
     maxAge: 15 * 7 * 24 * 60 * 60 * 1000, // 15 days
   });
-  res.cookie("facAccessToken", accessToken, {
+  res.cookie("facultyAccessToken", accessToken, {
     httpOnly: true,
     sameSite: "Strict",
+    path: "/faculty",
     maxAge: 1 * 7 * 24 * 60 * 60 * 1000, // 1 days
   });
   return res
@@ -352,14 +354,16 @@ export let facToken = AsyncHandler(async (req, res, next) => {
   );
   faculty.refreshToken = refreshToken;
   await faculty.save({ validateBeforeSave: false });
-  res.cookie("facRefreshToken", refreshToken, {
+  res.cookie("facultyRefreshToken", refreshToken, {
     httpOnly: true,
     sameSite: "Strict",
+    path: "/faculty",
     maxAge: 15 * 7 * 24 * 60 * 60 * 1000, // 15 days
   });
-  res.cookie("facAccessToken", accessToken, {
+  res.cookie("facultyAccessToken", accessToken, {
     httpOnly: true,
     sameSite: "Strict",
+    path: "/faculty",
     maxAge: 1 * 7 * 24 * 60 * 60 * 1000, // 1 days
   });
   return res

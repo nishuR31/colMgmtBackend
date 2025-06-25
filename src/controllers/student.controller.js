@@ -232,13 +232,15 @@ export let stuSignin = AsyncHandler(async (req, res) => {
   );
   student.refreshToken = refreshToken;
   await student.save({ validateBeforeSave: false });
-  res.cookie("stuRefreshToken", refreshToken, {
+  res.cookie("studentRefreshToken", refreshToken, {
     httpOnly: true,
+    path: "/student",
     sameSite: "Strict",
     maxAge: 15 * 7 * 24 * 60 * 60 * 1000, // 15 days
   });
-  res.cookie("stuAccessoken", refreshToken, {
+  res.cookie("studentAccessToken", refreshToken, {
     httpOnly: true,
+    path: "/student",
     sameSite: "Strict",
     maxAge: 1 * 7 * 24 * 60 * 60 * 1000, // 15 days
   });
@@ -366,11 +368,13 @@ export let stuToken = AsyncHandler(async (req, res, next) => {
   res.cookie("stuRefreshToken", refreshToken, {
     httpOnly: true,
     sameSite: "Strict",
+    path: "/student",
     maxAge: 15 * 7 * 24 * 60 * 60 * 1000, // 15 days
   });
   res.cookie("stuAccessToken", accessToken, {
     httpOnly: true,
     sameSite: "Strict",
+    path: "/student",
     maxAge: 1 * 7 * 24 * 60 * 60 * 1000, // 1 days
   });
   return res
@@ -395,7 +399,7 @@ export let stuLogout = AsyncHandler(async (req, res) => {
   student.refreshToken = null;
   await student.save();
   delete req.student;
-  res.clearCookie(stuAccessToken);
-  res.clearCookie(stuRefreshToken);
+  res.clearCookie(studentAccessToken);
+  res.clearCookie(studentRefreshToken);
   res.status(200).json(new ApiResponse({ message: "student logout" }).res());
 });

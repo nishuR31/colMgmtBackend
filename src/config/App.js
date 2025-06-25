@@ -6,10 +6,10 @@ import cookieParser from "cookie-parser";
 import ApiErrorResponse from "../utils/apiErrorResponse.js";
 import Logger from "../utils/logger.js";
 import studentRoute from "../routes/student.route.js";
-import facultyRoute from "../routers/faculty.route.js";
-import complaintRoute from "../routers/complaint.route.js";
-import adminRoute from "../routers/admin.route.js";
-import subjectRoute from "../routers/subject.route.js";
+import facultyRoute from "../routes/faculty.route.js";
+import complaintRoute from "../routes/complaint.route.js";
+import adminRoute from "../routes/admin.route.js";
+import subjectRoute from "../routes/subject.route.js";
 
 export default function App() {
   const app = express();
