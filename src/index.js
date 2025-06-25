@@ -2,10 +2,9 @@
 import App from "./config/app.js";
 import connectDb from "./config/mongoBD.js";
 import dotenv from "dotenv";
-dotenv.config();
+dotenv.config({ path: "../.env", debug: true });
 
 const port = process.env.PORT || 3001;
-
 try {
   await connectDb();
   const app = App();

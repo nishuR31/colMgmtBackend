@@ -103,7 +103,7 @@ export let adminSignin = AsyncHandler(async (req, res) => {
       .status(400)
       .json(new ApiErrorResponse({ message: "fields were missing" }).res());
   }
-  const admin = await Admin.findOne({ username, $or: [, { email }] });
+  const admin = await Admin.findOne({ username, $or: [{ email }] });
   if (!admin) {
     return res
       .status(404)
@@ -151,11 +151,13 @@ export let adminSignin = AsyncHandler(async (req, res) => {
   res.cookie("adminRefreshToken", refreshToken, {
     httpOnly: true,
     sameSite: "Strict",
+    path: "/admin",
     maxAge: 15 * 7 * 24 * 60 * 60 * 1000, // 15 days
   });
   res.cookie("adminAccessToken", accessToken, {
     httpOnly: true,
     sameSite: "Strict",
+    path: "/admin",
     maxAge: 1 * 7 * 24 * 60 * 60 * 1000, // 1 days
   });
   res.status(200).json(new ApiResponse({ accessToken: accessToken }).res());
@@ -285,14 +287,16 @@ export let adminToken = AsyncHandler(async (req, res) => {
   );
   admin.refreshToken = refreshToken;
   await admin.save({ validateBeforeSave: false });
-  res.cookie("refreshToken", refreshToken, {
+  res.cookie("adminRefreshToken", refreshToken, {
     httpOnly: true,
     sameSite: "Strict",
+    path: "/admin",
     maxAge: 15 * 7 * 24 * 60 * 60 * 1000, // 15 days
   });
-  res.cookie("accessToken", accessToken, {
+  res.cookie("adminAccessToken", accessToken, {
     httpOnly: true,
     sameSite: "Strict",
+    path: "/admin",
     maxAge: 1 * 7 * 24 * 60 * 60 * 1000, // 1 days
   });
   return res
