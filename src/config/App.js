@@ -7,30 +7,43 @@ import ApiErrorResponse from "../utils/apiErrorResponse.js";
 import Logger from "../utils/logger.js";
 import studentRoute from "../routes/student.route.js";
 import facultyRoute from "../routes/faculty.route.js";
+import marksRoute from "../routes/marks.route.js";
 import complaintRoute from "../routes/complaint.route.js";
 import adminRoute from "../routes/admin.route.js";
 import subjectRoute from "../routes/subject.route.js";
+import dotenv from "dotenv";
+import helpRoutePage from "../helper/helpRoutePage.js";
+import homePage from "../helper/homePage.js";
+dotenv.config({ path: "../../.env", debug: true });
+
+const port = process.env.PORT || 3000;
 
 export default function App() {
   const app = express();
   const baseUri = process.env.BASEURI || "/api/v1";
-
+  app.use(express.static("public")); // Serve public folder
   app.use(express.json());
   app.use(express.urlencoded({ extended: true }));
   app.use(cors());
-  app.use(helmet());
+  // app.use(helmet());
   app.use(cookieParser());
   app.use(Logger);
 
-  app.use(baseUri + "/student", studentRoute);
-  app.use(baseUri + "/faculty", facultyRoute);
-  app.use(baseUri + "/complaint", complaintRoute);
-  app.use(baseUri + "/marks", marksRoute);
-  app.use(baseUri + "/admin", adminRoute);
-  app.use(baseUri + "/subject", subjectRoute);
+  app.use(baseUri, studentRoute);
+  app.use(baseUri, facultyRoute);
+  app.use(baseUri, complaintRoute);
+  app.use(baseUri + "/student", marksRoute);
+  app.use(baseUri, adminRoute);
+  app.use(baseUri + "/student", subjectRoute);
 
-  app.get("/", (req, res) => {
-    res.send("Server running");
+  let defaultRoute = `http://localhost:${port}`;
+
+  app.get(baseUri, (req, res) => {
+    res.send(homePage);
+  });
+
+  app.get("/help", (req, res) => {
+    res.send(helpRoutePage);
   });
 
   app.get("/home", (req, res) => {
