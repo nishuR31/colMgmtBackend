@@ -10,7 +10,7 @@ try {
   const app = App();
 
   app.listen(port, () => {
-    console.log(`🚀 Server is running on http://localhost:${PORT}`);
+    console.log(`🚀 Server is running on http://localhost:${port}`);
   });
 } catch (err) {
   console.error("❌ Fatal startup error:", err);

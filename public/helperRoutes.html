@@ -1,0 +1,109 @@
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>API Route Helper</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-gradient-to-tl from-black via-gray-900 to-black text-white min-h-screen max-w-screen p-6 font-mono">
+    <div class="max-w-5xl mx-auto space-y-8">
+        <h1 class="text-4xl font-bold text-center text-amber-400 underline drop-shadow mb-10">🧭 API Route Helper
+            Dashboard</h1>
+
+        <div class="glass rounded-2xl shadow-xl p-6 border border-slate-700">
+            <h2 class="text-2xl mb-4 text-amber-300 font-semibold border-b border-slate-600 pb-2">🏠 Home Route</h2>
+            <p>Home:<a href="http://localhost:3000/api/v1/"
+                    class="text-blue-400 hover:underline block mb-2">http://localhost:3000/api/v1/</a></p>
+        </div>
+
+        <div class="glass rounded-2xl shadow-xl p-6 border border-slate-700">
+            <h2 class="text-2xl mb-4 text-amber-300 font-semibold border-b border-slate-600 pb-2">🛡️ Admin Routes</h2>
+            <p>sign in :: <a href="http://localhost:3000/api/v1/admin/signin"
+                    class="text-blue-400 hover:underline block">http://localhost:3000/api/v1/admin/signin</a></p>
+            <p>sign up :: <a href="http://localhost:3000/api/v1/admin/signup"
+                    class="text-blue-400 hover:underline block">http://localhost:3000/api/v1/admin/signup</a></p>
+            <p>delete by id :: <a href="http://localhost:3000/api/v1/admin/del/:id"
+                    class="text-blue-400 hover:underline block">http://localhost:3000/api/v1/admin/del/:id</a></p>
+            <p>find by username :: <a href="http://localhost:3000/api/v1/admin/:username"
+                    class="text-blue-400 hover:underline block">http://localhost:3000/api/v1/admin/:username</a></p>
+            <p>edit the username :: <a href="http://localhost:3000/api/v1/admin/:username/edit"
+                    class="text-blue-400 hover:underline block">http://localhost:3000/api/v1/admin/:username/edit</a>
+            </p>
+            <p>token rotation for username :: <a href="http://localhost:3000/api/v1/admin/:username/token"
+                    class="text-blue-400 hover:underline block">http://localhost:3000/api/v1/admin/:username/token</a>
+            </p>
+        </div>
+
+        <div class="glass rounded-2xl shadow-xl p-6 border border-slate-700">
+            <h2 class="text-2xl mb-4 text-amber-300 font-semibold border-b border-slate-600 pb-2">👨‍🏫 Faculty Routes
+            </h2>
+            <p>sign up :: <a href="http://localhost:3000/api/v1/faculty/signup"
+                    class="text-blue-400 hover:underline block">http://localhost:3000/api/v1/faculty/signup</a></p>
+            <p>sign in :: <a href="http://localhost:3000/api/v1/faculty/signin"
+                    class="text-blue-400 hover:underline block">http://localhost:3000/api/v1/faculty/signin</a></p>
+            <p>delete faculty :: <a href="http://localhost:3000/api/v1/faculty/del/:id"
+                    class="text-blue-400 hover:underline block">http://localhost:3000/api/v1/faculty/del/:id</a></p>
+            <p>username :: <a href="http://localhost:3000/api/v1/faculty/:username"
+                    class="text-blue-400 hover:underline block">http://localhost:3000/api/v1/faculty/:username</a></p>
+            <p>edit faculty :: <a href="http://localhost:3000/api/v1/faculty/:username/edit"
+                    class="text-blue-400 hover:underline block">http://localhost:3000/api/v1/faculty/:username/edit</a>
+            </p>
+            <p>token rotation :: <a href="http://localhost:3000/api/v1/faculty/:username/token"
+                    class="text-blue-400 hover:underline block">http://localhost:3000/api/v1/faculty/:username/token</a>
+            </p>
+        </div>
+
+        <div class="glass rounded-2xl shadow-xl p-6 border border-slate-700">
+            <h2 class="text-2xl mb-4 text-amber-300 font-semibold border-b border-slate-600 pb-2">🎓 Student Routes</h2>
+            <p>sign in :: <a href="http://localhost:3000/api/v1/student/signin"
+                    class="text-blue-400 hover:underline block">http://localhost:3000/api/v1/student/signin</a></p>
+            <p>sign up :: <a href="http://localhost:3000/api/v1/student/signup"
+                    class="text-blue-400 hover:underline block">http://localhost:3000/api/v1/student/signup</a></p>
+            <p>username :: <a href="http://localhost:3000/api/v1/student/:username"
+                    class="text-blue-400 hover:underline block">http://localhost:3000/api/v1/student/:username</a></p>
+            <p>delete student :: <a href="http://localhost:3000/api/v1/student/del:id"
+                    class="text-blue-400 hover:underline block">http://localhost:3000/api/v1/student/del:id</a></p>
+            <p>edit student :: <a href="http://localhost:3000/api/v1/student/:username/edit"
+                    class="text-blue-400 hover:underline block">http://localhost:3000/api/v1/student/:username/edit</a>
+            </p>
+            <p>token rotation :: <a href="http://localhost:3000/api/v1/student/:username/token"
+                    class="text-blue-400 hover:underline block">http://localhost:3000/api/v1/student/:username/token</a>
+            </p>
+        </div>
+
+        <div class="glass rounded-2xl shadow-xl p-6 border border-slate-700">
+            <h2 class="text-2xl mb-4 text-amber-300 font-semibold border-b border-slate-600 pb-2">📣 Complaint Routes
+            </h2>
+            <p>complaint file :: <a href="http://localhost:3000/api/v1/complaint"
+                    class="text-blue-400 hover:underline block">http://localhost:3000/api/v1/complaint</a></p>
+            <p>complaint reply :: <a href="http://localhost:3000/api/v1/complaint/:id/reply"
+                    class="text-blue-400 hover:underline block">http://localhost:3000/api/v1/complaint/:id/reply</a></p>
+            <p>complaint edit :: <a href="http://localhost:3000/api/v1/complaint/:id/edit"
+                    class="text-blue-400 hover:underline block">http://localhost:3000/api/v1/complaint/:id/edit</a></p>
+        </div>
+
+        <div class="glass rounded-2xl shadow-xl p-6 border border-slate-700">
+            <h2 class="text-2xl mb-4 text-amber-300 font-semibold border-b border-slate-600 pb-2">📚 Subject Routes</h2>
+            <p>subject assign :: <a href="http://localhost:3000/api/v1/student/subject/:username"
+                    class="text-blue-400 hover:underline block">http://localhost:3000/api/v1/student/subject/:username</a>
+            </p>
+            <p>edit subject :: <a href="http://localhost:3000/api/v1/student/subject/:username/edit"
+                    class="text-blue-400 hover:underline block">http://localhost:3000/api/v1/student/subject/:username/edit</a>
+            </p>
+        </div>
+
+        <div class="glass rounded-2xl shadow-xl p-6 border border-slate-700">
+            <h2 class="text-2xl mb-4 text-amber-300 font-semibold border-b border-slate-600 pb-2">📊 Marks Routes</h2>
+            <p>set marks :: <a href="http://localhost:3000/api/v1/student/marks/:username"
+                    class="text-blue-400 hover:underline block">http://localhost:3000/api/v1/student/marks/:username</a>
+            </p>
+            <p>edit marks ::<a href="http://localhost:3000/api/v1/student/marks/:username/edit"
+                    class="text-blue-400 hover:underline block">
+                    http://localhost:3000/api/v1/student/marks/:username/edit</a></p>
+        </div>
+    </div>
+</body>
+
+</html>

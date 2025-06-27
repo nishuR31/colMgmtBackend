@@ -1,10 +1,7 @@
 import AsyncHandler from "../utils/asyncHandler.js";
 import ApiErrorResponse from "../utils/apiErrorResponse.js";
-import {
-  verify,
-  tokenSecret,
-  generateTokenOptions,
-} from "../utils/jwtTokens.js";
+import { tokenSecret, generateTokenOptions } from "../constants.js";
+import { verify } from "../utils/jwtTokens.js";
 
 export default function authMiddleware(role = null) {
   return AsyncHandler(async (req, res, next) => {
